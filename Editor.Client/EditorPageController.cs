@@ -11,26 +11,22 @@ namespace Editor.Client
     public class EditorPageController
     {
         private readonly string documentId;
-        private readonly Guid clientId;
+        private readonly Guid clientId = Guid.NewGuid();
+        private readonly List<Operation> buffer = new List<Operation>();
+        private readonly Dictionary<Guid, EditorCursor> cursors = new Dictionary<Guid, EditorCursor>();
+        private readonly IEditorString model;
 
-        private IEditorString model;
-        private List<Operation> buffer;
         private int revision;
         private bool lockObject;
         private int position;
 
-        private Dictionary<Guid, EditorCursor> cursors;
         private jQuery textarea;
-
 
         public EditorPageController(string documentId)
         {
             this.documentId = documentId;
             jQuery.Document.On("ready", Run);
-            buffer = new List<Operation>();
-            clientId = Guid.NewGuid();
             model = new EditorString(clientId);
-            cursors = new Dictionary<Guid, EditorCursor>();
         }
 
         private void Run()
@@ -93,7 +89,7 @@ namespace Editor.Client
 
         private void RenderCursors(Author[] authors)
         {
-            var currentString = model.ToString();
+            var inputValue = model.ToString();
             foreach (var author in authors)
             {
                 author.ClientId = Guid.Parse(author.ClientId.ToString());
@@ -105,7 +101,7 @@ namespace Editor.Client
                         cursor = new EditorCursor(author.ClientId);
                         cursors.Add(author.ClientId, cursor);
                     }
-                    cursor.Change(currentString, author.Position);
+                    cursor.Change(inputValue, author.Position);
                 }
             }
 

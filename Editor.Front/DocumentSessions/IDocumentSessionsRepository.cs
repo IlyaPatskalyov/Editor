@@ -4,8 +4,8 @@ namespace Editor.Front.DocumentSessions
 {
     public interface IDocumentSessionsRepository
     {
-        DocumentSession GetOrLoad(Guid documentId);
+        IDocumentSession GetOrLoad(Guid documentId);
 
-        DocumentSession Get(Guid documentId);
+        IDocumentSession Get(Guid documentId);
     }
 }

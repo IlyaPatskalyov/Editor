@@ -6,22 +6,25 @@ namespace Editor.Front.DocumentSessions
 {
     public class DocumentSessionsRepository : IDocumentSessionsRepository
     {
+        private readonly ConcurrentDictionary<Guid, IDocumentSession> documents = new ConcurrentDictionary<Guid, IDocumentSession>();
         private readonly IDocumentsRepository documentsRepository;
-        private static readonly ConcurrentDictionary<Guid, DocumentSession> documents = new ConcurrentDictionary<Guid, DocumentSession>();
+        private readonly Func<string, IDocumentSession> documentSessionFactory;
 
-        public DocumentSessionsRepository(IDocumentsRepository documentsRepository)
+        public DocumentSessionsRepository(IDocumentsRepository documentsRepository,
+                                          Func<string, IDocumentSession> documentSessionFactory)
         {
             this.documentsRepository = documentsRepository;
+            this.documentSessionFactory = documentSessionFactory;
         }
 
-        public DocumentSession GetOrLoad(Guid documentId)
+        public IDocumentSession GetOrLoad(Guid documentId)
         {
-            return documents.GetOrAdd(documentId, id => new DocumentSession(documentsRepository.Get(id).Content));
+            return documents.GetOrAdd(documentId, id => documentSessionFactory(documentsRepository.Get(id).Content));
         }
 
-        public DocumentSession Get(Guid documentId)
+        public IDocumentSession Get(Guid documentId)
         {
-            DocumentSession documentSession;
+            IDocumentSession documentSession;
             return documents.TryGetValue(documentId, out documentSession) ? documentSession : null;
         }
     }

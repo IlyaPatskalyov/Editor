@@ -7,35 +7,27 @@ using Editor.Model;
 
 namespace Editor.Front.DocumentSessions
 {
-    public class DocumentSession
+    public class DocumentSession : IDocumentSession
     {
-        private ReaderWriterLockSlim operationsLocker = new ReaderWriterLockSlim();
+        private readonly IDateTimeService dateTimeService;
+        private readonly ConcurrentDictionary<Guid, Author> clients = new ConcurrentDictionary<Guid, Author>();
+        private readonly ReaderWriterLockSlim operationsLocker = new ReaderWriterLockSlim();
+        private readonly List<Operation> operationHistory;
 
-        private readonly IEditorString editorString;
-        private List<Operation> operationHistory;
-
-        private ConcurrentDictionary<Guid, Author> clients;
-
-        public DocumentSession(string content)
+        public DocumentSession(IDateTimeService dateTimeService, string content = null)
         {
-            editorString = new EditorString();
+            this.dateTimeService = dateTimeService;
             operationHistory = new List<Operation>();
-            operationHistory.AddRange(editorString.GenerateOperations(content ?? ""));
-            clients = new ConcurrentDictionary<Guid, Author>();
+            if (!string.IsNullOrEmpty(content))
+                operationHistory.AddRange(new EditorString().GenerateOperations(content));
         }
-
 
         public DocumentState GetState(int? revision)
         {
             try
             {
                 operationsLocker.EnterReadLock();
-                return new DocumentState
-                       {
-                           Authors = AliveAuthors,
-                           Revision = operationHistory.Count,
-                           Operations = GetOperationsByRevision(revision)
-                       };
+                return BuildDocumentState(GetOperationsByRevision(revision));
             }
             finally
             {
@@ -50,15 +42,9 @@ namespace Editor.Front.DocumentSessions
                 operationsLocker.EnterWriteLock();
 
                 var toSend = GetOperationsByRevision(revision);
-                editorString.ApplyOperations(newOperations);
                 operationHistory.AddRange(newOperations);
 
-                return new DocumentState
-                       {
-                           Authors = AliveAuthors,
-                           Revision = operationHistory.Count,
-                           Operations = toSend
-                       };
+                return BuildDocumentState(toSend);
             }
             finally
             {
@@ -66,11 +52,23 @@ namespace Editor.Front.DocumentSessions
             }
         }
 
+        public void AddOrUpdateAuthor(Guid clientId, int position)
+        {
+            clients[clientId] = new Author
+                                {
+                                    ClientId = clientId,
+                                    LastUpdate = dateTimeService.UtcNow,
+                                    Position = position
+                                };
+        }
+
         public void Save(Action<string> saveAction)
         {
             try
             {
                 operationsLocker.EnterReadLock();
+                var editorString = new EditorString();
+                editorString.ApplyOperations(operationHistory);
                 saveAction(editorString.ToString());
             }
             finally
@@ -79,24 +77,21 @@ namespace Editor.Front.DocumentSessions
             }
         }
 
-
-        public void AddOrUpdateAuthor(Guid clientId, int position)
+        private DocumentState BuildDocumentState(Operation[] toSend)
         {
-            clients[clientId] = new Author
-                                {
-                                    ClientId = clientId,
-                                    LastUpdate = DateTime.UtcNow,
-                                    Position = position
-                                };
+            return new DocumentState
+                   {
+                       Authors = clients.Where(t => t.Value.Position >= 0 && (dateTimeService.UtcNow - t.Value.LastUpdate).TotalSeconds < 10)
+                                        .Select(a => a.Value)
+                                        .ToArray(),
+                       Revision = operationHistory.Count,
+                       Operations = toSend
+                   };
         }
 
         private Operation[] GetOperationsByRevision(int? revision)
         {
             return operationHistory.Skip(revision ?? 0).ToArray();
         }
-
-        public Author[] AliveAuthors => clients.Where(t => t.Value.Position >= 0 && (DateTime.UtcNow - t.Value.LastUpdate).TotalSeconds < 10)
-                                               .Select(a => a.Value)
-                                               .ToArray();
     }
 }

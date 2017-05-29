@@ -26,7 +26,7 @@ namespace Editor.Model
             get
             {
                 var id = new CharId(Guid.Empty, 0);
-                return new Char(id, "", id, id);
+                return new Char(id: id, character: "", previous: id, next: id);
             }
         }
 
@@ -35,7 +35,7 @@ namespace Editor.Model
             get
             {
                 var id = new CharId(Guid.Empty, 1);
-                return new Char(id, "", id, id);
+                return new Char(id: id, character: "", previous: id, next: id);
             }
         }
     }

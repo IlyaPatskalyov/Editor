@@ -5,27 +5,27 @@ namespace Editor.Client
 {
     public class EditorCursor
     {
-        private static string[] colors = new[] {"#808080", "#FF0000", "#800000", "#008000", "#000080", "#800080", "#1A5276", "#873600"};
+        private static readonly string[] colors = {"#808080", "#FF0000", "#800000", "#008000", "#000080", "#800080", "#1A5276", "#873600"};
         private readonly jQuery element;
 
         public EditorCursor(Guid clientId)
         {
             element = jQuery.Select("<div class='editor__cursor'></div>")
-                            .Css("background-color", colors[clientId.ToByteArray()[0] % colors.Length]);
+                            .Css("background-color", colors[clientId.GetHashCode() % colors.Length]);
 
             jQuery.Select("#EditorTextArea")
                   .Parent()
                   .Prepend(element);
         }
 
-        public void Change(string current, int position)
+        public void Change(string inputValue, int position)
         {
             int x = 0, y = 0;
-            for (var i = 0; i < current.Length; i++)
+            for (var i = 0; i < inputValue.Length; i++)
             {
                 if (i == position)
                     break;
-                if (current[i] == '\n')
+                if (inputValue[i] == '\n')
                 {
                     y++;
                     x = -1;

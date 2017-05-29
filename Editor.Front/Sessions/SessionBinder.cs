@@ -12,7 +12,6 @@ namespace Editor.Front.Sessions
     {
         private const string CookieName = "UserId";
 
-
         public bool BindModel(HttpActionContext actionContext, ModelBindingContext bindingContext)
         {
             if (bindingContext.ModelType != typeof(Session))
@@ -24,9 +23,7 @@ namespace Editor.Front.Sessions
 
         public object BindModel(ControllerContext controllerContext, System.Web.Mvc.ModelBindingContext bindingContext)
         {
-            if (bindingContext.ModelType == typeof(Session))
-                return Bind(controllerContext.HttpContext);
-            return null;
+            return bindingContext.ModelType == typeof(Session) ? Bind(controllerContext.HttpContext) : null;
         }
 
         private static Session Bind(HttpContextBase context)
@@ -47,7 +44,6 @@ namespace Editor.Front.Sessions
                        UserId = userId
                    };
         }
-
 
         private static HttpContextWrapper GetHttpContextWrapper(HttpRequestMessage request)
         {

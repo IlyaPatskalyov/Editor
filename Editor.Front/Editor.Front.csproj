@@ -102,9 +102,12 @@
     <Compile Include="Controllers\EditorApiController.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="DocumentSessions\Author.cs" />
+    <Compile Include="DocumentSessions\DateTimeService.cs" />
     <Compile Include="DocumentSessions\DocumentSession.cs" />
     <Compile Include="DocumentSessions\DocumentSessionsRepository.cs" />
     <Compile Include="DocumentSessions\DocumentState.cs" />
+    <Compile Include="DocumentSessions\IDateTimeService.cs" />
+    <Compile Include="DocumentSessions\IDocumentSession.cs" />
     <Compile Include="DocumentSessions\IDocumentSessionsRepository.cs" />
     <Compile Include="Global.asax.cs" />
     <Compile Include="Loader.cs" />

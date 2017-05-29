@@ -55,7 +55,7 @@ namespace Editor.Model
             return result.ToArray();
         }
 
-        public void ApplyOperations(Operation[] operations)
+        public void ApplyOperations(IEnumerable<Operation> operations)
         {
             foreach (var operation in operations)
             {
@@ -68,8 +68,8 @@ namespace Editor.Model
 
         private Operation GenerateInsertOperation(char ch, int position)
         {
-            var previous = IthVisisible(position);
-            var next = IthVisisible(position + 1);
+            var previous = this[position];
+            var next = this[position + 1];
 
             var newChar = new Char(new CharId(clientId, operationId++), ch.ToString(), previous.Id, next.Id);
             Insert(newChar);
@@ -78,7 +78,7 @@ namespace Editor.Model
 
         private Operation GenerateDeleteOperation(int position)
         {
-            var toDelete = IthVisisible(position + 1);
+            var toDelete = this[position + 1];
             Delete(toDelete);
             return new Operation(OperationType.Delete, toDelete);
         }
@@ -88,11 +88,14 @@ namespace Editor.Model
             deletedIds.Add(toDelete.Id, true);
         }
 
-        private Char IthVisisible(int position)
+        public Char this[int i]
         {
-            return chars.Where(t => !deletedIds.ContainsKey(t.Id))
-                        .Skip(position)
-                        .First();
+            get
+            {
+                return chars.Where(t => !deletedIds.ContainsKey(t.Id))
+                            .Skip(i)
+                            .First();
+            }
         }
 
         private void Insert(Char newChar)
@@ -132,6 +135,7 @@ namespace Editor.Model
                 return string.Compare(l.Id.ClientId, newChar.Id.ClientId, StringComparison.Ordinal);
             return l.Id.OperationId.CompareTo(newChar.Id.OperationId);
         }
+
 
         public override string ToString()
         {

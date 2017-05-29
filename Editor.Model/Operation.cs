@@ -15,10 +15,5 @@ namespace Editor.Model
         public OperationType OperationType { get; set; }
 
         public Char Char { get; set; }
-
-        public override string ToString()
-        {
-            return $"{(OperationType == OperationType.Insert ? "+" : "-")}{Char.Character}";
-        }
     }
 }
