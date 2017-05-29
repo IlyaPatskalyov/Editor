@@ -1,0 +1,45 @@
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+    background-color: #efefef;
+}
+
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.editor { position: relative; }
+
+.editor__textarea {
+    margin: 0px auto;
+    resize: none;
+    font-family: Consolas, Monospace, Courier, sans-serif;
+    font-size: 20px;
+    overflow-y: hidden;
+    outline: none !important;
+    min-height: 280px;
+    border: #afafaf 15px solid;
+    height: 334px;
+    width: 834px;
+}
+
+.editor__textarea:focus {
+    border: #afafaf 15px solid;
+    outline: none !important;
+}
+
+.editor__cursor {
+    width: 2px;
+    height: 24px;
+    background-color: #ff0000;
+    z-index: 10000;
+    position: absolute;
+    animation: blink-cursor 1s infinite;
+}
+
+@-webkit-keyframes blink-cursor {
+    0%, 49% { width: 0px; }
+
+    50%, 100% { width: 2px; }
+}

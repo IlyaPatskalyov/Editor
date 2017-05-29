@@ -1,0 +1,7 @@
+{
+  output: "$(OutDir)/../../../Editor.Front/Scripts/bridge/",
+  autoPropertyToField:true,
+  cleanOutputFolderBeforeBuild: true,
+  fileNameCasing: "Lowercase"
+
+  }

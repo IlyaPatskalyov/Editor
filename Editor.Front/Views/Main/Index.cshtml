@@ -1,0 +1,32 @@
+﻿@using Editor.Storage
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<h1>My documents</h1>
+
+<form action="/Main/Create" method="POST">
+    <input type="submit" class="btn btn-primary" value="Создать"/>
+</form>
+<br/>
+<table class="table table-striped table-bordered table-condensed table-hover">
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Created</th>
+        <th>Modified</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (Document d in ViewBag.Documents)
+    {
+        <tr>
+            <td>
+                <a target="_blank" href="/Main/Editor/@d.Id">@d.Id</a>
+            </td>
+            <td>@d.Created</td>
+            <td>@d.Modified</td>
+        </tr>
+    }
+    </tbody>
+</table>

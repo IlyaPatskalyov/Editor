@@ -1,0 +1,16 @@
+﻿@{
+    ViewBag.Title = "Editor";
+}
+<h2>Document @ViewBag.DocumentId</h2>
+
+<div class="editor">
+    <textarea class="editor__textarea" id="EditorTextArea" wrap="off"></textarea>
+</div>
+<form action="/Main/SaveEditor/@ViewBag.DocumentId" method="POST">
+    <input type="submit" class="btn btn-primary" value="Сохранить"/>
+</form>
+@section scripts {
+    <script>
+        new Editor.Client.EditorPageController('@ViewBag.DocumentId')
+    </script>
+}
