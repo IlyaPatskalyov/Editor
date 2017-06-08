@@ -1,12 +1,17 @@
-﻿using System;
-using System.Web.Mvc;
+using System;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Web.Http;
+using System.Web.Http.ModelBinding;
 using Editor.Front.DocumentSessions;
+using Editor.Front.Results;
 using Editor.Front.Sessions;
 using Editor.Storage;
 
 namespace Editor.Front.Controllers
 {
-    public class MainController : Controller
+    public class MainController : ApiController
     {
         private readonly IDocumentsRepository documentsRepository;
         private readonly IDocumentSessionsRepository documentSessionsRepository;
@@ -17,34 +22,39 @@ namespace Editor.Front.Controllers
             this.documentSessionsRepository = documentSessionsRepository;
         }
 
-        public ActionResult Index(Session session)
+        [HttpGet]
+        [Route("~/")]
+        public HttpResponseMessage Index([ModelBinder] Session session)
         {
-            ViewBag.Documents = documentsRepository.GetByUserId(session.UserId);
-            return View();
+            return new RazorViewResult(session, "Main.Index.cshtml", documentsRepository.GetByUserId(session.UserId));
         }
 
         [HttpPost]
-        public ActionResult Create(Session session)
+        [Route("~/Create")]
+        public HttpResponseMessage Create([ModelBinder] Session session)
         {
             var document = documentsRepository.Create(session.UserId);
-            return Redirect($"Editor/{document.Id}");
+            return new RedirectResult($"/Editor/{document.Id}");
         }
 
-        public ActionResult Editor(Guid id)
+        [HttpGet]
+        [Route("~/Editor/{id}")]
+        public HttpResponseMessage Editor([ModelBinder] Session session, Guid id)
         {
             var document = documentsRepository.Get(id);
             if (document == null)
-                return Redirect("/");
-            ViewBag.DocumentId = id;
-            return View();
+                return new RedirectResult("/");
+
+            return new RazorViewResult(session, "Main.Editor.cshtml", id);
         }
 
         [HttpPost]
-        public ActionResult SaveEditor(Guid id)
+        [Route("~/Editor/{id}/Save")]
+        public HttpResponseMessage SaveEditor(Guid id)
         {
             var documentSession = documentSessionsRepository.Get(id);
             documentSession?.Save(content => documentsRepository.UpdateContent(id, content));
-            return Redirect("/");
+            return new RedirectResult("/");
         }
     }
 }

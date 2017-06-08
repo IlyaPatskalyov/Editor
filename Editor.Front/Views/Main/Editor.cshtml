@@ -1,16 +1,48 @@
-﻿@{
-    ViewBag.Title = "Editor";
-}
-<h2>Document @ViewBag.DocumentId</h2>
+﻿@model Guid
 
-<div class="editor">
-    <textarea class="editor__textarea" id="EditorTextArea" wrap="off"></textarea>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Editor</title>
+    <link rel="stylesheet" href="~/Content/site.css"/>
+    <link rel="stylesheet" href="~/Content/bootstrap.css"/>
+    <link rel="stylesheet" href="~/Content/bootstrap-theme.css"/>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a href="/" class="navbar-brand">Edtor</a>
+        </div>
+    </div>
 </div>
-<form action="/Main/SaveEditor/@ViewBag.DocumentId" method="POST">
-    <input type="submit" class="btn btn-primary" value="Сохранить"/>
-</form>
-@section scripts {
-    <script>
-        new Editor.Client.EditorPageController('@ViewBag.DocumentId')
-    </script>
-}
+<div class="container body-content">
+    <h2>Document @Model</h2>
+
+    <div class="editor">
+        <textarea class="editor__textarea" id="EditorTextArea" wrap="off"></textarea>
+    </div>
+    <form action="/Editor/@(Model)/Save" method="POST">
+        <input type="submit" class="btn btn-primary" value="Сохранить"/>
+    </form>
+
+</div>
+
+<script src="~/Scripts/jquery-1.9.1.js"></script>
+<script src="~/Scripts/bootstrap.js"></script>
+<script src="~/Scripts/site.js"></script>
+<script src="~/Scripts/bridge/bridge.js"></script>
+<script src="~/Scripts/bridge/Editor.Client.js"></script>
+<script>
+    new Editor.Client.EditorPageController('@Model')
+</script>
+</body>
+</html>

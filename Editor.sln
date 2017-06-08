@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor.Storage.EF", "Editor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor.Storage.EF.SQLite", "Editor.Storage.EF.SQLite\Editor.Storage.EF.SQLite.csproj", "{F964D237-836F-4D46-B88D-FD56C4DEB720}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor.Standalone", "Editor.Standalone\Editor.Standalone.csproj", "{11FAE856-3CFD-431E-AD20-BCEFDED922D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{F964D237-836F-4D46-B88D-FD56C4DEB720}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F964D237-836F-4D46-B88D-FD56C4DEB720}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F964D237-836F-4D46-B88D-FD56C4DEB720}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11FAE856-3CFD-431E-AD20-BCEFDED922D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11FAE856-3CFD-431E-AD20-BCEFDED922D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11FAE856-3CFD-431E-AD20-BCEFDED922D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11FAE856-3CFD-431E-AD20-BCEFDED922D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
