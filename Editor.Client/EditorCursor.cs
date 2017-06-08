@@ -11,7 +11,7 @@ namespace Editor.Client
         public EditorCursor(Guid clientId)
         {
             element = jQuery.Select("<div class='editor__cursor'></div>")
-                            .Css("background-color", colors[clientId.GetHashCode() % colors.Length]);
+                            .Css("background-color", colors[Math.Abs(clientId.GetHashCode()) % colors.Length]);
 
             jQuery.Select("#EditorTextArea")
                   .Parent()

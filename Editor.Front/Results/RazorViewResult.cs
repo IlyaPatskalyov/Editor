@@ -24,6 +24,7 @@ namespace Editor.Front.Results
                                    new CookieHeaderValue(SessionBinder.CookieName, session.UserId.ToString())
                                    {
                                        HttpOnly = true,
+                                       Path = "/",
                                        Expires = DateTimeOffset.MaxValue
                                    }
                                });

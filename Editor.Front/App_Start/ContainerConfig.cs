@@ -1,5 +1,6 @@
 ﻿using Autofac;
 using Autofac.Integration.WebApi;
+using Editor.Front.DocumentSessions;
 using Editor.Front.Sessions;
 using Editor.Storage.EF;
 using Editor.Storage.EF.SQLite;
@@ -26,6 +27,7 @@ namespace Editor.Front
 
             builder.RegisterWebApiModelBinderProvider();
             builder.RegisterType<SessionBinder>().AsModelBinderForTypes(typeof(Session));
+            builder.RegisterType<DocumentSession>().As<IDocumentSession>().InstancePerDependency();
             return builder.Build();
         }
     }
