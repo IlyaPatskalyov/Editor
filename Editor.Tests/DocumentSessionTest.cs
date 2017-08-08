@@ -21,10 +21,12 @@ namespace Editor.Tests
         [Test]
         public void TestOperations()
         {
-            Guid clientId = Guid.NewGuid();
+            var clientId = Guid.NewGuid();
+            var clientId2 = Guid.NewGuid();
             var editorString = new EditorString(clientId);
             var operations1 = editorString.GenerateOperations("abc");
 
+            
             documentSession.Change(clientId, new DocumenChange
                                              {
                                                  Operations = operations1
@@ -33,7 +35,7 @@ namespace Editor.Tests
             Assert.AreEqual(0, state.Operations.Length);
             Assert.AreEqual(3, state.Revision);
 
-            var state2 = documentSession.GetState(clientId, null);
+            var state2 = documentSession.GetState(clientId2, null);
             Assert.AreEqual(3, state2.Operations.Length);
             Assert.AreEqual(3, state2.Revision);
 
@@ -47,7 +49,7 @@ namespace Editor.Tests
             Assert.AreEqual(0, state3.Operations.Length);
             Assert.AreEqual(5, state3.Revision);
 
-            var state4 = documentSession.GetState(clientId, 4);
+            var state4 = documentSession.GetState(clientId2, 4);
             Assert.AreEqual(1, state4.Operations.Length);
             Assert.AreEqual(5, state4.Revision);
         }
@@ -61,20 +63,23 @@ namespace Editor.Tests
             var author1 = Guid.NewGuid();
             documentSession.Change(author1, new DocumenChange()
                                             {
-                                                Position = 4
+                                                Position = 4,
+                                                Operations = new string[0]
                                             });
             mockDateTimeService.AddSeconds(5);
 
             var author2 = Guid.NewGuid();
             documentSession.Change(author2, new DocumenChange()
                                             {
-                                                Position = 0
+                                                Position = 0,
+                                                Operations = new string[0]
                                             });
 
             var author3 = Guid.NewGuid();
             documentSession.Change(author3, new DocumenChange()
                                             {
-                                                Position = -1
+                                                Position = -1,
+                                                Operations = new string[0]
                                             });
 
             var state = documentSession.GetState(clientId, null);
