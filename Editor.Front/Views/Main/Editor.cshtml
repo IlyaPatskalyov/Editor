@@ -1,4 +1,4 @@
-﻿@model Guid
+﻿@model Editor.Front.Models.EditorModel
 
 <!DOCTYPE html>
 <html>
@@ -14,23 +14,20 @@
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a href="/" class="navbar-brand">Edtor</a>
+            <a href="/" class="navbar-brand">Editor</a>
+            <ul class="nav navbar-text navbar-right">
+                <li>User @Model.UserId</li>
+            </ul>
         </div>
     </div>
 </div>
 <div class="container body-content">
-    <h2>Document @Model</h2>
+    <h2>Document @Model.DocumentId</h2>
 
     <div class="editor">
-        <textarea class="editor__textarea" id="EditorTextArea" wrap="off"></textarea>
+        <textarea class="editor__textarea" id="EditorTextArea"></textarea>
     </div>
-    <form action="/Editor/@(Model)/Save" method="POST">
+    <form action="/Editor/@(Model.DocumentId)/Save" method="POST">
         <input type="submit" class="btn btn-primary" value="Сохранить"/>
     </form>
 
@@ -42,7 +39,7 @@
 <script src="~/Scripts/bridge/bridge.js"></script>
 <script src="~/Scripts/bridge/Editor.Client.js"></script>
 <script>
-    new Editor.Client.EditorPageController('@Model')
+    new Editor.Client.EditorPageController('@Model.DocumentId')
 </script>
 </body>
 </html>

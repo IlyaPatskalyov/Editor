@@ -11,7 +11,7 @@ namespace Editor.Front
         private static string GetBinPath()
         {
             var relativeSearchPath = AppDomain.CurrentDomain.RelativeSearchPath;
-            if (String.IsNullOrEmpty(relativeSearchPath))
+            if (string.IsNullOrEmpty(relativeSearchPath))
                 return AppDomain.CurrentDomain.BaseDirectory;
             if (relativeSearchPath.Contains("ReSharperPlatform"))
                 return AppDomain.CurrentDomain.BaseDirectory;
@@ -35,7 +35,6 @@ namespace Editor.Front
                 catch (BadImageFormatException)
                 {
                     //Log.Information("Can't load file {dllFile}", dllFile);
-                    continue;
                 }
                 //Log.Information("Assembly {0} loaded", assemblyName);
             }

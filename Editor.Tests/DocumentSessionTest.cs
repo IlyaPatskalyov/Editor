@@ -21,24 +21,33 @@ namespace Editor.Tests
         [Test]
         public void TestOperations()
         {
-            var editorString = new EditorString();
+            Guid clientId = Guid.NewGuid();
+            var editorString = new EditorString(clientId);
             var operations1 = editorString.GenerateOperations("abc");
 
-            var state = documentSession.ChangeState(null, operations1);
+            documentSession.Change(clientId, new DocumenChange
+                                             {
+                                                 Operations = operations1
+                                             });
+            var state = documentSession.GetState(clientId, null);
             Assert.AreEqual(0, state.Operations.Length);
             Assert.AreEqual(3, state.Revision);
 
-            var state2 = documentSession.GetState(null);
+            var state2 = documentSession.GetState(clientId, null);
             Assert.AreEqual(3, state2.Operations.Length);
             Assert.AreEqual(3, state2.Revision);
 
             var operations2 = editorString.GenerateOperations("adebc");
 
-            var state3 = documentSession.ChangeState(3, operations2);
+            documentSession.Change(clientId, new DocumenChange()
+                                             {
+                                                 Operations = operations2
+                                             });
+            var state3 = documentSession.GetState(clientId, null);
             Assert.AreEqual(0, state3.Operations.Length);
             Assert.AreEqual(5, state3.Revision);
 
-            var state4 = documentSession.GetState(4);
+            var state4 = documentSession.GetState(clientId, 4);
             Assert.AreEqual(1, state4.Operations.Length);
             Assert.AreEqual(5, state4.Revision);
         }
@@ -46,30 +55,39 @@ namespace Editor.Tests
         [Test]
         public void TestAuthors()
         {
+            var clientId = Guid.NewGuid();
             mockDateTimeService.UtcNow = DateTime.UtcNow;
 
             var author1 = Guid.NewGuid();
-            documentSession.AddOrUpdateAuthor(author1, 4);
-
+            documentSession.Change(author1, new DocumenChange()
+                                            {
+                                                Position = 4
+                                            });
             mockDateTimeService.AddSeconds(5);
 
             var author2 = Guid.NewGuid();
-            documentSession.AddOrUpdateAuthor(author2, 0);
-            
-            var author3 = Guid.NewGuid();
-            documentSession.AddOrUpdateAuthor(author3, -1);
+            documentSession.Change(author2, new DocumenChange()
+                                            {
+                                                Position = 0
+                                            });
 
-            var state = documentSession.GetState(null);
+            var author3 = Guid.NewGuid();
+            documentSession.Change(author3, new DocumenChange()
+                                            {
+                                                Position = -1
+                                            });
+
+            var state = documentSession.GetState(clientId, null);
             Assert.AreEqual(2, state.Authors.Length);
             Assert.AreEqual(4, state.Authors.First(a => a.ClientId == author1).Position);
             Assert.AreEqual(0, state.Authors.First(a => a.ClientId == author2).Position);
-            
+
             mockDateTimeService.AddSeconds(5);
-            var state2 = documentSession.GetState(null);
+            var state2 = documentSession.GetState(clientId, null);
             Assert.AreEqual(1, state2.Authors.Length);
-            
+
             mockDateTimeService.AddSeconds(5);
-            var state3 = documentSession.GetState(null);
+            var state3 = documentSession.GetState(clientId, null);
             Assert.AreEqual(0, state3.Authors.Length);
         }
     }

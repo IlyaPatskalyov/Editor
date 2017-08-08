@@ -39,7 +39,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CharCollection.cs" />
+    <Compile Include="EditorStringHelpers.cs" />
+    <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="IEditorString.cs" />
+    <Compile Include="OperationSerializer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Char.cs" />
     <Compile Include="CharId.cs" />

@@ -1,42 +1,54 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Editor.Model
 {
-    public class CharId
+    internal class CharId
     {
         public CharId()
         {
         }
 
-        public CharId(Guid clientId, int operationId)
+        public CharId(Guid clientId, uint operationId)
         {
-            ClientId = clientId.ToString().Substring(0, 8);
-            OperationId = operationId;
+            Value = TransformClientId(clientId) << 24 | operationId;
         }
 
-        public string ClientId { get; set; }
-        public int OperationId { get; set; }
+        public CharId(uint value)
+        {
+            Value = value;
+        }
+
+        private static uint TransformClientId(Guid clientId)
+        {
+            return BitConverter.ToUInt32(clientId.ToByteArray(), 0) & 0xFF;
+        }
+
+        public readonly uint Value;
+
+        public static int Compare(CharId newCharId, CharId l)
+        {
+            return l.Value.CompareTo(newCharId.Value);
+        }
+
+        public bool AreEqualClientId(Guid clientId)
+        {
+            return (Value >> 24) == TransformClientId(clientId);
+        }
+
+        public static ClientIdOperationIdEqualityComparer Comparer { get; } = new ClientIdOperationIdEqualityComparer();
 
         public sealed class ClientIdOperationIdEqualityComparer : IEqualityComparer<CharId>
         {
             public bool Equals(CharId x, CharId y)
             {
-                if (ReferenceEquals(x, y)) return true;
-                if (ReferenceEquals(x, null)) return false;
-                if (ReferenceEquals(y, null)) return false;
-                return string.Equals(x.ClientId, y.ClientId) && x.OperationId == y.OperationId;
+                return x.Value == y.Value;
             }
 
             public int GetHashCode(CharId obj)
             {
-                unchecked
-                {
-                    return ((obj.ClientId != null ? obj.ClientId.GetHashCode() : 0) * 397) ^ obj.OperationId;
-                }
+                return (int) obj.Value;
             }
         }
-
-        public static ClientIdOperationIdEqualityComparer Comparer { get; } = new ClientIdOperationIdEqualityComparer();
     }
 }

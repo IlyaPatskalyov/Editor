@@ -46,8 +46,11 @@
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Owin.WebSocket, Version=1.7.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\packages\Owin.WebSocket.1.7.0\lib\net45\Owin.WebSocket.dll</HintPath>
     </Reference>
     <Reference Include="RazorEngine, Version=3.9.3.0, Culture=neutral, PublicKeyToken=9ee697374c7e744a">
       <HintPath>..\packages\RazorEngine.3.9.3\lib\net45\RazorEngine.dll</HintPath>
@@ -94,10 +97,26 @@
     <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
+    <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+      <HintPath>..\packages\Serilog.2.4.0\lib\net45\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Sinks.File, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+      <HintPath>..\packages\Serilog.Sinks.File.3.2.0\lib\net45\Serilog.Sinks.File.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Sinks.RollingFile, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10">
+      <HintPath>..\packages\Serilog.Sinks.RollingFile.3.3.0\lib\net45\Serilog.Sinks.RollingFile.dll</HintPath>
+    </Reference>
+    <Reference Include="SerilogWeb.Classic, Version=2.1.0.0, Culture=neutral, PublicKeyToken=9462ddd55fbc0e7f">
+      <HintPath>..\packages\SerilogWeb.Classic.2.1.13\lib\net45\SerilogWeb.Classic.dll</HintPath>
+    </Reference>
+    <Reference Include="SerilogWeb.Classic.WebApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=9462ddd55fbc0e7f">
+      <HintPath>..\packages\SerilogWeb.Classic.WebApi.1.0.3\lib\net45\SerilogWeb.Classic.WebApi.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\ContainerConfig.cs" />
+    <Compile Include="App_Start\LoggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\EditorApiController.cs" />
     <Compile Include="Controllers\MainController.cs" />
@@ -111,6 +130,8 @@
     <Compile Include="DocumentSessions\IDocumentSessionsRepository.cs" />
     <Compile Include="Global.asax.cs" />
     <Compile Include="Loader.cs" />
+    <Compile Include="Models\EditorModel.cs" />
+    <Compile Include="Models\IndexModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Results\RazorViewResult.cs" />
     <Compile Include="Results\RedirectResult.cs" />
@@ -118,6 +139,10 @@
     <Compile Include="Sessions\SessionBinder.cs" />
     <Compile Include="Settings\ApplicationSettings.cs" />
     <Compile Include="Settings\IApplicationSettings.cs" />
+    <Compile Include="WebApiExtensions\GlobalExceptionLogger.cs" />
+    <Compile Include="WebApiExtensions\LogMessageHandler.cs" />
+    <Compile Include="WebSockets\EditorWebSocket.cs" />
+    <Compile Include="WebSockets\IEditorSocket.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Content\bootstrap-theme.css" />

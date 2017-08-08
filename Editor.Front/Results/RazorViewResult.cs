@@ -1,19 +1,17 @@
 using System;
-using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using Editor.Front.Sessions;
-using RazorEngine;
-using Encoding = System.Text.Encoding;
+using RazorEngine.Templating;
 
 namespace Editor.Front.Results
 {
     public class RazorViewResult : HttpResponseMessage
     {
-
-        public RazorViewResult(Session session, string viewName, object model)
+        public RazorViewResult(IRazorEngineService razorEngineService, Session session, string viewName, object model)
         {
-            Content = new StringContent(GetContent(viewName, model), Encoding.UTF8, "text/html");
+            Content = new StringContent(GetContent(razorEngineService, viewName, model), Encoding.UTF8, "text/html");
             SetCookie(session);
         }
 
@@ -30,14 +28,9 @@ namespace Editor.Front.Results
                                });
         }
 
-        private string GetContent(string viewName, object model)
+        private string GetContent(IRazorEngineService razorEngineService, string viewName, object model)
         {
-            var stream = typeof(Global).Assembly.GetManifestResourceStream($"Editor.Front.Views.{viewName}");
-            using (var reader = new StreamReader(stream))
-            {
-                var template = reader.ReadToEnd();
-                return Razor.Parse(template, model);
-            }
+            return razorEngineService.RunCompile(viewName, model.GetType(), model);
         }
     }
 }

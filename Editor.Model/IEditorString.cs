@@ -4,8 +4,7 @@ namespace Editor.Model
 {
     public interface IEditorString
     {
-        Operation[] GenerateOperations();
-        Operation[] GenerateOperations(string newValue);
-        void ApplyOperations(IEnumerable<Operation> operations);
+        string[] GenerateOperations(string newValue);
+        void ApplyOperations(ICollection<string> ops);
     }
 }

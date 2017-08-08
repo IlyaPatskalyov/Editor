@@ -1,5 +1,4 @@
-﻿@using Editor.Storage
-@model Document[]
+﻿@model Editor.Front.Models.IndexModel
 
 <!DOCTYPE html>
 <html>
@@ -15,14 +14,11 @@
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a href="/" class="navbar-brand">Edtor</a>
+            <a href="/" class="navbar-brand">Editor</a>
         </div>
+        <ul class="nav navbar-text navbar-right">
+            <li>User @Model.UserId</li>
+        </ul>
     </div>
 </div>
 <div class="container body-content">
@@ -41,7 +37,7 @@
         </tr>
         </thead>
         <tbody>
-        @foreach (Document d in Model)
+        @foreach (var d in Model.Documents)
         {
             <tr>
                 <td>

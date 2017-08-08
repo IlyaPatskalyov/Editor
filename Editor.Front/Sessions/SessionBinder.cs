@@ -18,9 +18,7 @@ namespace Editor.Front.Sessions
             Guid userId;
             var userIdCookie = actionContext.Request.Headers.GetCookies(CookieName).FirstOrDefault();
             if (userIdCookie == null || !Guid.TryParse(userIdCookie[CookieName].Value, out userId))
-            {
                 userId = Guid.NewGuid();
-            }
             bindingContext.Model = new Session
                                    {
                                        UserId = userId

@@ -1,19 +1,15 @@
 namespace Editor.Model
 {
-    public class Operation
+    internal class Operation
     {
-        public Operation()
-        {
-        }
-
         public Operation(OperationType operationType, Char c)
         {
             OperationType = operationType;
             Char = c;
         }
 
-        public OperationType OperationType { get; set; }
+        public readonly OperationType OperationType;
 
-        public Char Char { get; set; }
+        public readonly Char Char;
     }
 }

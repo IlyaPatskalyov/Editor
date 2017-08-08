@@ -11,7 +11,7 @@ namespace Editor.Storage.EF.SQLite
         private readonly IEntityConfigurator[] entityConfigurators;
 
         public SQLiteDbContext(IDbSettings settings, IEntityConfigurator[] entityConfigurators)
-            : base(new SQLiteConnection()
+            : base(new SQLiteConnection
                    {
                        ConnectionString = settings.ConnectionString
                    }, true)

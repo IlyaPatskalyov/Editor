@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Web.Http;
 using Editor.Front.DocumentSessions;
-using Editor.Model;
 
 namespace Editor.Front.Controllers
 {
@@ -14,23 +13,12 @@ namespace Editor.Front.Controllers
             this.documentSessionsRepository = documentSessionsRepository;
         }
 
-        [HttpGet]
-        public object Get(Guid documentId, int? revision = null)
-        {
-            return documentSessionsRepository.GetOrLoad(documentId).GetState(revision);
-        }
-
         [HttpPost]
-        public object Post([FromUri] Guid documentId, [FromUri] Guid clientId, [FromBody] Operation[] operations,
-                           int? revision = null, [FromUri] int position = 0)
+        public object Post([FromUri] Guid documentId, [FromUri] Guid clientId, [FromBody] DocumenChange change)
         {
             var documentSession = documentSessionsRepository.GetOrLoad(documentId);
-            documentSession.AddOrUpdateAuthor(clientId, position);
-
-            if (operations != null && operations.Length > 0)
-                return documentSession.ChangeState(revision, operations);
-            return
-                documentSession.GetState(revision);
+            documentSession.Change(clientId, change);
+            return documentSession.GetState(clientId, change.Revision);
         }
     }
 }

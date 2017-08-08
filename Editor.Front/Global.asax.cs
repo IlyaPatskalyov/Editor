@@ -10,8 +10,9 @@ namespace Editor.Front
         {
             var container = ContainerConfig.Build();
             GlobalConfiguration.Configuration.DependencyResolver = new AutofacWebApiDependencyResolver(container);
-            
-            GlobalConfiguration.Configure(WebApiConfig.Register);
+            LoggerConfig.Build();
+            WebApiConfig.Register(GlobalConfiguration.Configuration, container);
+            GlobalConfiguration.Configuration.EnsureInitialized();
         }
     }
 }

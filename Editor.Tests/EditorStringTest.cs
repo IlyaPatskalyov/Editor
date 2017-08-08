@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Editor.Model;
 using NUnit.Framework;
 
@@ -14,7 +16,6 @@ namespace Editor.Tests
 
             CheckChange(str, remote, "abcdef");
             CheckChange(str, remote, "abc123def");
-            CheckChange(str, remote, "abcdef");
         }
 
         [Test]
@@ -32,7 +33,7 @@ namespace Editor.Tests
             var str = new EditorString();
             var operations = str.GenerateOperations("abc");
             str.ApplyOperations(operations);
-            Assert.AreEqual("aabbcc", str.ToString());
+            Assert.AreEqual("aabcbc", str.ToString());
         }
 
         [Test]
@@ -48,8 +49,27 @@ namespace Editor.Tests
 
             str.ApplyOperations(gen2b);
             str2.ApplyOperations(gen2a);
-            Assert.AreEqual("adgehbc", str.ToString());
-            Assert.AreEqual("agdhebc", str2.ToString());
+            Assert.AreEqual("aghdebc", str.ToString());
+            Assert.AreEqual("adeghbc", str2.ToString());
+        }
+
+        [Test]
+        public void TestConcurrent2()
+        {
+            var str = new EditorString();
+            var str2 = new EditorString();
+            var str3 = new EditorString();
+
+            var gen1 = str.GenerateOperations("12");
+            str2.ApplyOperations(gen1);
+
+            var gen2 = str2.GenerateOperations("1a2");
+            str.ApplyOperations(gen2);
+
+            str3.ApplyOperations(gen1.Concat(gen2).ToArray());
+
+            Assert.AreEqual(str.ToString(), str2.ToString());
+            Assert.AreEqual(str.ToString(), str3.ToString());
         }
 
 
@@ -57,7 +77,7 @@ namespace Editor.Tests
         public void TestCombine()
         {
             var str = new EditorString();
-            var operations = new List<Operation>();
+            var operations = new List<string>();
             operations.AddRange(str.GenerateOperations("abc"));
             operations.AddRange(str.GenerateOperations(""));
             operations.AddRange(str.GenerateOperations("def"));
@@ -65,6 +85,19 @@ namespace Editor.Tests
             var str2 = new EditorString();
             str2.ApplyOperations(operations.ToArray());
             Assert.AreEqual("def", str2.ToString());
+        }
+
+        [Test]
+        public void TestSplitApply()
+        {
+            var str = new EditorString();
+            var operations = new List<string>();
+            operations.AddRange(str.GenerateOperations("1234567890"));
+
+            var str2 = new EditorString();
+            str2.ApplyOperations(operations.GetRange(0, operations.Count / 2));
+            str2.ApplyOperations(operations.GetRange(operations.Count / 2, operations.Count / 2));
+            Assert.AreEqual(str.ToString(), str2.ToString());
         }
 
         [Test]
@@ -87,6 +120,30 @@ namespace Editor.Tests
             remote.ApplyOperations(operations);
             Assert.AreEqual(change, str.ToString());
             Assert.AreEqual(change, remote.ToString());
+        }
+
+        [Test]
+        public void TestPerfomance()
+        {
+            var str = new EditorString();
+            var bigstring = new string('a', 2 * 1024 * 1024);
+            Console.WriteLine(bigstring.Length);
+            str.GenerateOperations(bigstring);
+
+            bigstring = bigstring.Insert(bigstring.Length / 2, new string('b', bigstring.Length));
+            Console.WriteLine(bigstring.Length);
+            str.GenerateOperations(bigstring);
+
+            bigstring = bigstring.Remove(bigstring.Length / 4, bigstring.Length / 2);
+            Console.WriteLine(bigstring.Length);
+            str.GenerateOperations(bigstring);
+
+            bigstring = string.Concat(Enumerable.Repeat("ab", bigstring.Length / 2));
+            Console.WriteLine(bigstring.Length);
+            str.GenerateOperations(bigstring);
+
+            Console.WriteLine(bigstring.Length);
+            Assert.AreEqual(str.ToString(), bigstring);
         }
     }
 }

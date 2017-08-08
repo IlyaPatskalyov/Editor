@@ -1,13 +1,17 @@
 using System;
-using Editor.Model;
+using Editor.Front.WebSockets;
 
 namespace Editor.Front.DocumentSessions
 {
     public interface IDocumentSession
     {
-        DocumentState GetState(int? revision);
-        DocumentState ChangeState(int? revision, Operation[] newOperations);
-        void AddOrUpdateAuthor(Guid clientId, int position);
+        void Register(Guid clientId, IEditorSocket editorSocket);
+        void Unregister(Guid clientId);
+
+        DocumentState GetState(Guid? clientId, int? revision);
+
+        void Change(Guid clientId, DocumenChange change);
+
         void Save(Action<string> saveAction);
     }
 }

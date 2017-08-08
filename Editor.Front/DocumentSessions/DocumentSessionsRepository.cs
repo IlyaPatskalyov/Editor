@@ -7,8 +7,8 @@ namespace Editor.Front.DocumentSessions
     public class DocumentSessionsRepository : IDocumentSessionsRepository
     {
         private readonly ConcurrentDictionary<Guid, IDocumentSession> documents = new ConcurrentDictionary<Guid, IDocumentSession>();
-        private readonly IDocumentsRepository documentsRepository;
         private readonly Func<string, IDocumentSession> documentSessionFactory;
+        private readonly IDocumentsRepository documentsRepository;
 
         public DocumentSessionsRepository(IDocumentsRepository documentsRepository,
                                           Func<string, IDocumentSession> documentSessionFactory)

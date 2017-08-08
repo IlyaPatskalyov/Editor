@@ -6,140 +6,144 @@ namespace Editor.Model
 {
     public class EditorString : IEditorString
     {
-        private readonly Guid clientId;
-        private readonly List<Char> chars;
-        private readonly Dictionary<CharId, bool> deletedIds;
-        private int operationId = 0;
+        private readonly CharCollection chars;
+        private uint operationId;
 
         public EditorString(Guid? clientId = null)
         {
-            this.clientId = clientId ?? Guid.NewGuid();
-            chars = new List<Char> {Char.Begin, Char.End};
-            deletedIds = new Dictionary<CharId, bool>(CharId.Comparer);
+            operationId = new CharId(clientId ?? Guid.NewGuid(), 0).Value;
+            chars = new CharCollection();
+            chars.Insert(0, new[]
+                            {
+                                Char.Begin,
+                                Char.End
+                            });
         }
 
-        public Operation[] GenerateOperations()
+        public string[] GenerateOperations(string newValue)
         {
-            return chars.Skip(1).Take(chars.Count - 2).Select(c => new Operation(OperationType.Insert, c)).ToArray();
-        }
+            var oldValue = chars.BuildString();
+            var start = 0;
+            while (start < oldValue.Length && start < newValue.Length && oldValue[start] == newValue[start]) start++;
 
-        public Operation[] GenerateOperations(string newValue)
-        {
-            var oldValue = ToString();
-            int start = 0;
-            while (start < oldValue.Length && start < newValue.Length && oldValue[start] == newValue[start])
-                start++;
+            if (chars.Length - 2 == newValue.Length && start == newValue.Length)
+                return new string[0];
 
-            if (oldValue.Length == newValue.Length && start == newValue.Length)
-                return new Operation[0];
+            int endOld = chars.Length - 3, endNew = newValue.Length - 1;
 
-            int endOld = oldValue.Length - 1, endNew = newValue.Length - 1;
-            while ((endOld >= start) && (endNew >= start) && oldValue[endOld] == newValue[endNew])
+            while (endOld >= start && endNew >= start && oldValue[endOld] == newValue[endNew])
             {
                 endOld--;
                 endNew--;
             }
 
-            var result = new List<Operation>();
+            var toDelete = new Char[0];
+            var toInsert = new Char[0];
 
             if (endNew <= endOld)
             {
-                for (var i = start; i <= endOld; i++)
-                    result.Add(GenerateDeleteOperation(start));
+                toDelete = GenerateDeleteOperation(start, endOld);
+                ApplyDeleteOperations(toDelete);
                 endOld = start - 1;
             }
 
             if (endNew > endOld)
-                for (var i = start; i <= endNew; i++)
-                    result.Add(GenerateInsertOperation(newValue[i], i));
-            return result.ToArray();
+            {
+                toInsert = GenerateInsertOperation(newValue.Substring(start, endNew - start + 1), start);
+                ApplyInsertOperations(toInsert);
+            }
+            return
+                toDelete.Select(c => new Operation(OperationType.Delete, c))
+                        .Concat(toInsert.Select(c => new Operation(OperationType.Insert, c)))
+                        .Select(OperationSerializer.Serialize)
+                        .FastToArray(toDelete.Length + toInsert.Length);
         }
 
-        public void ApplyOperations(IEnumerable<Operation> operations)
+        public void ApplyOperations(ICollection<string> ops)
         {
-            foreach (var operation in operations)
+            var operations = ops.Select(OperationSerializer.Deserialize).ToArray();
+            var countInsert = operations.Count(t => t.OperationType == OperationType.Insert);
+            ApplyInsertOperations(operations.Where(t => t.OperationType == OperationType.Insert).Select(t => t.Char).FastToArray(countInsert));
+            ApplyDeleteOperations(operations.Where(t => t.OperationType == OperationType.Delete).Select(t => t.Char)
+                                            .FastToArray(ops.Count - countInsert));
+        }
+
+        private void ApplyDeleteOperations(Char[] toDelete)
+        {
+            chars.Delete(toDelete);
+        }
+
+        private void ApplyInsertOperations(Char[] toInsert)
+        {
+            if (toInsert.Length > 0)
             {
-                if (operation.OperationType == OperationType.Insert)
-                    Insert(operation.Char);
-                if (operation.OperationType == OperationType.Delete)
-                    Delete(operation.Char);
+                Char[] batch;
+                var first = 0;
+                for (var i = 1; i < toInsert.Length; i++)
+                {
+                    if (!(toInsert[i].Previous.Value == toInsert[i - 1].Id.Value && toInsert[i].Next.Value == toInsert[i - 1].Next.Value))
+                    {
+                        batch = toInsert.Skip(first).Take(i - first).FastToArray(i - first);
+                        chars.Insert(SearchPosition(batch[0].Id, batch[0].Previous, batch[0].Next), batch);
+                        first = i;
+                    }
+                }
+                batch = first == 0 ? toInsert : toInsert.Skip(first).Take(toInsert.Length - first).FastToArray(toInsert.Length - first);
+                chars.Insert(SearchPosition(batch[0].Id, batch[0].Previous, batch[0].Next), batch);
             }
         }
 
-        private Operation GenerateInsertOperation(char ch, int position)
+        private Char[] GenerateInsertOperation(string s, int position)
         {
-            var previous = this[position];
-            var next = this[position + 1];
+            var previousId = chars.GetByVisiblePosition(position).Id;
+            var nextId = chars.GetByVisiblePosition(position + 1).Id;
 
-            var newChar = new Char(new CharId(clientId, operationId++), ch.ToString(), previous.Id, next.Id);
-            Insert(newChar);
-            return new Operation(OperationType.Insert, newChar);
-        }
-
-        private Operation GenerateDeleteOperation(int position)
-        {
-            var toDelete = this[position + 1];
-            Delete(toDelete);
-            return new Operation(OperationType.Delete, toDelete);
-        }
-
-        private void Delete(Char toDelete)
-        {
-            deletedIds.Add(toDelete.Id, true);
-        }
-
-        public Char this[int i]
-        {
-            get
+            var result = new Char[s.Length];
+            for (var i = 0; i < s.Length; i++)
             {
-                return chars.Where(t => !deletedIds.ContainsKey(t.Id))
-                            .Skip(i)
-                            .First();
+                var currentId = new CharId(operationId++);
+                result[i] = new Char(currentId, s[i].ToString(), previousId, nextId);
+                previousId = currentId;
             }
+            return result;
         }
 
-        private void Insert(Char newChar)
+        private Char[] GenerateDeleteOperation(int from, int to)
         {
-            var indexById = new Dictionary<CharId, int>(CharId.Comparer);
-            for (var i = 0; i < chars.Count; i++)
-                indexById[chars[i].Id] = i;
-            Insert(newChar, newChar.Previous, newChar.Next, indexById);
+            var result = new Char[to - from + 1];
+            for (var i = from; i <= to; i++)
+                result[i - from] = chars.GetByVisiblePosition(i + 1);
+            return result;
         }
 
-        private void Insert(Char newChar, CharId previousId, CharId nextId, Dictionary<CharId, int> indexById)
+        private int SearchPosition(CharId newCharId, CharId previousId, CharId nextId)
         {
             int nextIndex, previousIndex;
-            if (!(indexById.TryGetValue(previousId, out previousIndex) &&
-                  indexById.TryGetValue(nextId, out nextIndex) &&
+            if (!(chars.TryGetPositionById(previousId, out previousIndex) &&
+                  chars.TryGetPositionById(nextId, out nextIndex) &&
                   nextIndex >= previousIndex))
                 throw new ArgumentException("Wrong next or previous");
 
             if (nextIndex == previousIndex + 1)
-                chars.Insert(nextIndex, newChar);
-            else
             {
-                var substring = chars.GetRange(previousIndex + 1, nextIndex - previousIndex);
-                var skipped = substring
-                    .SkipWhile(l => CompareChars(newChar, l) < 0)
-                    .Take(2)
-                    .ToList();
-                if (skipped.Count < 2)
-                    skipped = substring;
-                Insert(newChar, skipped[0].Id, skipped[1].Id, indexById);
+                return nextIndex;
             }
-        }
 
-        private static int CompareChars(Char newChar, Char l)
-        {
-            if (l.Id.ClientId != newChar.Id.ClientId)
-                return string.Compare(l.Id.ClientId, newChar.Id.ClientId, StringComparison.Ordinal);
-            return l.Id.OperationId.CompareTo(newChar.Id.OperationId);
+            var skipped = chars
+                .GetChars()
+                .Skip(previousIndex)
+                .Take(nextIndex - previousIndex)
+                .SkipWhile(l => CharId.Compare(newCharId, l.Id) < 0)
+                .Take(2)
+                .ToList();
+            if (skipped.Count < 2)
+                skipped = chars.GetChars().Skip(previousIndex).Take(2).ToList();
+            return SearchPosition(newCharId, skipped[0].Id, skipped[1].Id);
         }
-
 
         public override string ToString()
         {
-            return string.Concat(chars.Where(t => !deletedIds.ContainsKey(t.Id)).Select(t => t.Character));
+            return chars.BuildString();
         }
     }
 }
